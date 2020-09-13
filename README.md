@@ -1,9 +1,12 @@
-ISUCON7 予選問題
-====
+# ISUCON7 予選問題
+
+- daido1976's updated
+  - Clone from https://github.com/isucon/isucon7-qualify
+  - Build with https://github.com/matsuu/docker-isucon/tree/master/isucon7-qualifier
 
 [予選マニュアル](https://gist.github.com/941/8c64842b71995a2d448315e2594f62c2)
 
-## 感想戦用、1VMでの動かし方
+## 感想戦用、1VM での動かし方
 
 ### ディレクトリ構成
 
@@ -41,7 +44,7 @@ $ sudo apt install -y git curl libreadline-dev pkg-config autoconf automake buil
 	libmhash-dev libmcrypt-dev libgd-dev libtidy-dev
 ```
 
-xbuildで言語をインストールします。ベンチマーカーのために、Goは必ずインストールしてください。
+xbuild で言語をインストールします。ベンチマーカーのために、Go は必ずインストールしてください。
 他の言語は使わないのであればスキップしても問題ないと思います。
 
 ```
@@ -59,7 +62,7 @@ xbuild/php-install    -f 7.1.9   /home/isucon/local/php -- --disable-phar --with
 
 ### ベンチマーカーの準備
 
-Goを使うのでこれだけは最初に環境変数を設定しておく
+Go を使うのでこれだけは最初に環境変数を設定しておく
 
 ```
 export PATH=$HOME/local/go/bin:$HOME/go/bin:$PATH
@@ -100,10 +103,9 @@ mysql> GRANT ALL on *.* TO isucon@'localhost';
 zcat ~/isubata/bench/isucon7q-initial-dataset.sql.gz | sudo mysql isubata
 ```
 
-デフォルトだとTCPが127.0.0.1しかbindしてないので、複数台構成に対応するには
+デフォルトだと TCP が 127.0.0.1 しか bind してないので、複数台構成に対応するには
 `/etc/mysql/mysql.conf.d/mysqld.cnf` で `bind-address = 127.0.0.1` になっている
 場所を `bind-address = 0.0.0.0` に書き換える。
-
 
 ### nginx
 
@@ -114,7 +116,6 @@ $ sudo unlink default
 $ sudo ln -s ../sites-available/nginx.conf  # php の場合は nginx.php.conf
 $ sudo systemctl restart nginx
 ```
-
 
 ### 参考実装(python)を動かす
 
@@ -137,7 +138,6 @@ export ISUBATA_DB_PASSWORD=isucon
 予選本番では、 `/etc/hosts` に各ホスト名を書いて、環境変数は systemd から `env.sh` ファイルを読み込んでいました。
 この辺は適当に使いやすいように設定してください。
 
-
 ### ベンチマーク実行
 
 ```console
@@ -155,7 +155,6 @@ $ jq . < result.json
 ### 備考
 
 systemd に置く設定ファイルなどは files/ ディレクトリから探してください。
-
 
 ### 使用データの取得元
 
