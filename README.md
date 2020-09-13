@@ -2,6 +2,7 @@
 
 - Clone from https://github.com/isucon/isucon7-qualify
 - Build with https://github.com/matsuu/docker-isucon/tree/master/isucon7-qualifier
+- See http://isucon.net/archives/54946542.html#docker
 
 # ISUCON7 予選問題
 
