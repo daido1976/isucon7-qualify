@@ -1,8 +1,9 @@
-# ISUCON7 予選問題
+## daido1976's updated
 
-- daido1976's updated
-  - Clone from https://github.com/isucon/isucon7-qualify
-  - Build with https://github.com/matsuu/docker-isucon/tree/master/isucon7-qualifier
+- Clone from https://github.com/isucon/isucon7-qualify
+- Build with https://github.com/matsuu/docker-isucon/tree/master/isucon7-qualifier
+
+# ISUCON7 予選問題
 
 [予選マニュアル](https://gist.github.com/941/8c64842b71995a2d448315e2594f62c2)
 
