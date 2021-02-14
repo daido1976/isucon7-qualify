@@ -42,7 +42,7 @@ docker-compose exec db bash
 
 ### チューニングの仕方
 
-- docker-compose.yml 内の `GIT_URL` パラメータを自分のリポジトリに書き換える
+- `docker/app/xxx/` の Dockerfile を `webapp/xxx/` に置き、Dockerfile と docker-compose.yml を書き換える（[参考 Commit](https://github.com/daido1976/isucon7-qualify/commit/e7632dd6a2d6e129ed698d95cec9bd06cdd32ac7)）
 - `docker-compose up -d --build app`
 
 ---
