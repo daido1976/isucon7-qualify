@@ -4,6 +4,47 @@
 - Build with https://github.com/matsuu/docker-isucon/tree/master/isucon7-qualifier
 - See http://isucon.net/archives/54946542.html#docker
 
+### 起動
+
+ベンチマーク以外の Docker を構築&起動する。そこそこ時間がかかる。
+
+```
+docker-compose up -d db
+docker-compose up -d app
+docker-compose up -d web
+```
+
+db は起動時に流し込みがあるため時間がかかる。ログに「MySQL init process done. Ready for start up.」の文字列があれば ok。
+
+```
+docker-compose logs db | grep 'done'
+```
+
+動作確認
+
+```
+open http://127.0.0.1
+```
+
+### ベンチマーク
+
+```
+docker-compose up bench
+```
+
+### ログイン
+
+```
+docker-compose exec web bash
+docker-compose exec app bash
+docker-compose exec db bash
+```
+
+### チューニングの仕方
+
+- docker-compose.yml 内の `GIT_URL` パラメータを自分のリポジトリに書き換える
+- `docker-compose up -d --build app`
+
 ---
 
 # ISUCON7 予選問題
