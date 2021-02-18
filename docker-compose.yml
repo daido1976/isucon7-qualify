@@ -26,15 +26,9 @@ services:
   app:
     build:
       #context: ./docker/app/golang
-      #context: ./docker/app/nodejs
-      #context: ./docker/app/perl
-      # context: ./docker/app/python
       context: ./webapp/ruby
 
     #image: isucon7-qualifier-app:golang
-    #image: isucon7-qualifier-app:nodejs
-    #image: isucon7-qualifier-app:perl
-    # image: isucon7-qualifier-app:python
     image: isucon7-qualifier-app:ruby
     networks:
       - backend
