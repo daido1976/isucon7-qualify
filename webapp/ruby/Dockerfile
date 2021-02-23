@@ -1,4 +1,4 @@
-FROM ruby:2.4.2
+FROM ruby:2.6.6
 
 # ARG GIT_URL=https://github.com/isucon/isucon7-qualify.git
 
