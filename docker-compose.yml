@@ -37,6 +37,8 @@ services:
       ISUBATA_DB_USER: isucon
       ISUBATA_DB_PASSWORD: isucon
       ISUBATA_DB_HOST: db
+    tty: true
+    stdin_open: true
   db:
     build:
       context: ./docker/db
