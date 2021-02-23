@@ -1,7 +1,0 @@
-site.retry
-ubuntu-xenial-16.04-cloudimg-console.log
-*.ova
-*.box
-.vagrant/
-packer_cache/
-*-vagrant-ovf/

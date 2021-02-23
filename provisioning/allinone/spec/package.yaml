@@ -1,5 +1,0 @@
-packeage:
-  nginx:
-    installed: true
-  mysql-server:
-    installed: true
