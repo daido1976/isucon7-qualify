@@ -5,7 +5,7 @@ FROM ruby:2.4.2
 # RUN git clone $GIT_URL /home/isucon/isubata
 COPY . /home/isucon/isubata/webapp/ruby/
 WORKDIR /home/isucon/isubata/webapp/ruby
-RUN bundle install --path vendor/bundle
+RUN bundle install
 
 EXPOSE 5000
 

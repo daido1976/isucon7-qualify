@@ -25,11 +25,10 @@ services:
       - "80:80"
   app:
     build:
-      #context: ./docker/app/golang
       context: ./webapp/ruby
-
-    #image: isucon7-qualifier-app:golang
     image: isucon7-qualifier-app:ruby
+    volumes:
+      - ./webapp/ruby:/home/isucon/isubata/webapp/ruby
     networks:
       - backend
     depends_on:
