@@ -156,8 +156,6 @@ class App < Sinatra::Base
     user_id = session[:user_id]
     return 403 if user_id.nil?
 
-    sleep 1.0
-
     rows = db.query('SELECT id FROM channel').to_a
     channel_ids = rows.map { |row| row['id'] }
 
