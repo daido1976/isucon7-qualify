@@ -5,7 +5,7 @@ require 'sinatra/base'
 class App < Sinatra::Base
   configure do
     set :session_secret, 'tonymoris'
-    set :public_folder, File.expand_path('../../public', __FILE__)
+    set :public_folder, File.expand_path('../public', __dir__)
     set :avatar_max_size, 1 * 1024 * 1024
 
     enable :sessions
@@ -34,25 +34,22 @@ class App < Sinatra::Base
   end
 
   get '/initialize' do
-    db.query("DELETE FROM user WHERE id > 1000")
-    db.query("DELETE FROM image WHERE id > 1001")
-    db.query("DELETE FROM channel WHERE id > 10")
-    db.query("DELETE FROM message WHERE id > 10000")
-    db.query("DELETE FROM haveread")
+    db.query('DELETE FROM user WHERE id > 1000')
+    db.query('DELETE FROM image WHERE id > 1001')
+    db.query('DELETE FROM channel WHERE id > 10')
+    db.query('DELETE FROM message WHERE id > 10000')
+    db.query('DELETE FROM haveread')
     204
   end
 
   get '/' do
-    if session.has_key?(:user_id)
-      return redirect '/channel/1', 303
-    end
+    return redirect '/channel/1', 303 if session.has_key?(:user_id)
+
     erb :index
   end
 
   get '/channel/:channel_id' do
-    if user.nil?
-      return redirect '/login', 303
-    end
+    return redirect '/login', 303 if user.nil?
 
     @channel_id = params[:channel_id].to_i
     @channels, @description = get_channel_list_info(@channel_id)
@@ -66,13 +63,13 @@ class App < Sinatra::Base
   post '/register' do
     name = params[:name]
     pw = params[:password]
-    if name.nil? || name.empty? || pw.nil? || pw.empty?
-      return 400
-    end
+    return 400 if name.nil? || name.empty? || pw.nil? || pw.empty?
+
     begin
       user_id = register(name, pw)
     rescue Mysql2::Error => e
       return 409 if e.error_number == 1062
+
       raise e
     end
     session[:user_id] = user_id
@@ -87,9 +84,8 @@ class App < Sinatra::Base
     name = params[:name]
     statement = db.prepare('SELECT * FROM user WHERE name = ?')
     row = statement.execute(name).first
-    if row.nil? || row['password'] != Digest::SHA1.hexdigest(row['salt'] + params[:password])
-      return 403
-    end
+    return 403 if row.nil? || row['password'] != Digest::SHA1.hexdigest(row['salt'] + params[:password])
+
     session[:user_id] = row['id']
     redirect '/', 303
   end
@@ -103,18 +99,15 @@ class App < Sinatra::Base
     user_id = session[:user_id]
     message = params[:message]
     channel_id = params[:channel_id]
-    if user_id.nil? || message.nil? || channel_id.nil? || user.nil?
-      return 403
-    end
+    return 403 if user_id.nil? || message.nil? || channel_id.nil? || user.nil?
+
     db_add_message(channel_id.to_i, user_id, message)
     204
   end
 
   get '/message' do
     user_id = session[:user_id]
-    if user_id.nil?
-      return 403
-    end
+    return 403 if user_id.nil?
 
     channel_id = params[:channel_id].to_i
     last_message_id = params[:last_message_id].to_i
@@ -126,7 +119,7 @@ class App < Sinatra::Base
       r['id'] = row['id']
       statement = db.prepare('SELECT name, display_name, avatar_icon FROM user WHERE id = ?')
       r['user'] = statement.execute(row['user_id']).first
-      r['date'] = row['created_at'].strftime("%Y/%m/%d %H:%M:%S")
+      r['date'] = row['created_at'].strftime('%Y/%m/%d %H:%M:%S')
       r['content'] = row['content']
       response << r
       statement.close
@@ -137,7 +130,7 @@ class App < Sinatra::Base
     statement = db.prepare([
       'INSERT INTO haveread (user_id, channel_id, message_id, updated_at, created_at) ',
       'VALUES (?, ?, ?, NOW(), NOW()) ',
-      'ON DUPLICATE KEY UPDATE message_id = ?, updated_at = NOW()',
+      'ON DUPLICATE KEY UPDATE message_id = ?, updated_at = NOW()'
     ].join)
     statement.execute(user_id, channel_id, max_message_id, max_message_id)
 
@@ -147,9 +140,7 @@ class App < Sinatra::Base
 
   get '/fetch' do
     user_id = session[:user_id]
-    if user_id.nil?
-      return 403
-    end
+    return 403 if user_id.nil?
 
     sleep 1.0
 
@@ -164,12 +155,12 @@ class App < Sinatra::Base
       r = {}
       r['channel_id'] = channel_id
       r['unread'] = if row.nil?
-        statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?')
-        statement.execute(channel_id).first['cnt']
-      else
-        statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id')
-        statement.execute(channel_id, row['message_id']).first['cnt']
-      end
+                      statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?')
+                      statement.execute(channel_id).first['cnt']
+                    else
+                      statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id')
+                      statement.execute(channel_id, row['message_id']).first['cnt']
+                    end
       statement.close
       res << r
     end
@@ -179,19 +170,14 @@ class App < Sinatra::Base
   end
 
   get '/history/:channel_id' do
-    if user.nil?
-      return redirect '/login', 303
-    end
+    return redirect '/login', 303 if user.nil?
 
     @channel_id = params[:channel_id].to_i
 
     @page = params[:page]
-    if @page.nil?
-      @page = '1'
-    end
-    if @page !~ /\A\d+\Z/ || @page == '0'
-      return 400
-    end
+    @page = '1' if @page.nil?
+    return 400 if @page !~ /\A\d+\Z/ || @page == '0'
+
     @page = @page.to_i
 
     n = 20
@@ -204,7 +190,7 @@ class App < Sinatra::Base
       r['id'] = row['id']
       statement = db.prepare('SELECT name, display_name, avatar_icon FROM user WHERE id = ?')
       r['user'] = statement.execute(row['user_id']).first
-      r['date'] = row['created_at'].strftime("%Y/%m/%d %H:%M:%S")
+      r['date'] = row['created_at'].strftime('%Y/%m/%d %H:%M:%S')
       r['content'] = row['content']
       @messages << r
       statement.close
@@ -214,7 +200,7 @@ class App < Sinatra::Base
     statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?')
     cnt = statement.execute(@channel_id).first['cnt'].to_f
     statement.close
-    @max_page = cnt == 0 ? 1 :(cnt / n).ceil
+    @max_page = cnt == 0 ? 1 : (cnt / n).ceil
 
     return 400 if @page > @max_page
 
@@ -223,9 +209,7 @@ class App < Sinatra::Base
   end
 
   get '/profile/:user_name' do
-    if user.nil?
-      return redirect '/login', 303
-    end
+    return redirect '/login', 303 if user.nil?
 
     @channels, = get_channel_list_info
 
@@ -234,33 +218,26 @@ class App < Sinatra::Base
     @user = statement.execute(user_name).first
     statement.close
 
-    if @user.nil?
-      return 404
-    end
+    return 404 if @user.nil?
 
     @self_profile = user['id'] == @user['id']
     erb :profile
   end
 
   get '/add_channel' do
-    if user.nil?
-      return redirect '/login', 303
-    end
+    return redirect '/login', 303 if user.nil?
 
     @channels, = get_channel_list_info
     erb :add_channel
   end
 
   post '/add_channel' do
-    if user.nil?
-      return redirect '/login', 303
-    end
+    return redirect '/login', 303 if user.nil?
 
     name = params[:name]
     description = params[:description]
-    if name.nil? || description.nil?
-      return 400
-    end
+    return 400 if name.nil? || description.nil?
+
     statement = db.prepare('INSERT INTO channel (name, description, updated_at, created_at) VALUES (?, ?, NOW(), NOW())')
     statement.execute(name, description)
     channel_id = db.last_id
@@ -269,13 +246,9 @@ class App < Sinatra::Base
   end
 
   post '/profile' do
-    if user.nil?
-      return redirect '/login', 303
-    end
+    return redirect '/login', 303 if user.nil?
 
-    if user.nil?
-      return 403
-    end
+    return 403 if user.nil?
 
     display_name = params[:display_name]
     avatar_name = nil
@@ -286,13 +259,9 @@ class App < Sinatra::Base
       filename = file[:filename]
       if !filename.nil? && !filename.empty?
         ext = filename.include?('.') ? File.extname(filename) : ''
-        unless ['.jpg', '.jpeg', '.png', '.gif'].include?(ext)
-          return 400
-        end
+        return 400 unless ['.jpg', '.jpeg', '.png', '.gif'].include?(ext)
 
-        if settings.avatar_max_size < file[:tempfile].size
-          return 400
-        end
+        return 400 if settings.avatar_max_size < file[:tempfile].size
 
         data = file[:tempfile].read
         digest = Digest::SHA1.hexdigest(data)
@@ -365,7 +334,7 @@ class App < Sinatra::Base
     messages
   end
 
-  def random_string(n)
+  def random_string(_n)
     Array.new(20).map { (('a'..'z').to_a + ('A'..'Z').to_a + ('0'..'9').to_a).sample }.join
   end
 
@@ -392,15 +361,10 @@ class App < Sinatra::Base
   end
 
   def ext2mime(ext)
-    if ['.jpg', '.jpeg'].include?(ext)
-      return 'image/jpeg'
-    end
-    if ext == '.png'
-      return 'image/png'
-    end
-    if ext == '.gif'
-      return 'image/gif'
-    end
+    return 'image/jpeg' if ['.jpg', '.jpeg'].include?(ext)
+    return 'image/png' if ext == '.png'
+    return 'image/gif' if ext == '.gif'
+
     ''
   end
 end
