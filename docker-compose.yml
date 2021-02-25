@@ -12,8 +12,11 @@ services:
       - frontend
   web:
     build:
-      context: ./docker/web
+      context: .
+      dockerfile: Dockerfile.nginx
     image: isucon7-qualifier-web:nginx
+    volumes:
+      - ./webapp/ruby/icons:/home/isucon/isubata/webapp/ruby/icons
     networks:
       - frontend
       - backend
