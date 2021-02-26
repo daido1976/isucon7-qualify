@@ -192,21 +192,33 @@ class App < Sinatra::Base
 
     @page = @page.to_i
 
+    # Load messages (main)
     n = 20
     statement = db.prepare('SELECT * FROM message WHERE channel_id = ? ORDER BY id DESC LIMIT ? OFFSET ?')
     rows = statement.execute(@channel_id, n, (@page - 1) * n).to_a
     statement.close
 
+    # Load nested users (sub, to resolve N+1)
+    if rows.size > 0
+      user_ids = rows.map { |r| r['user_id'] }.uniq
+      statement =
+        db.prepare(
+          "SELECT id, name, display_name, avatar_icon FROM user WHERE id IN (#{Array.new(rows.size, '?').join(',')})"
+        )
+      user_rows = statement.execute(*user_ids).to_a
+      statement.close
+    else
+      user_rows = []
+    end
+
     @messages = []
     rows.each do |row|
       r = {}
       r['id'] = row['id']
-      statement = db.prepare('SELECT name, display_name, avatar_icon FROM user WHERE id = ?')
-      r['user'] = statement.execute(row['user_id']).first
+      r['user'] = user_rows.find { |user_row| user_row['id'] == row['user_id'] }
       r['date'] = row['created_at'].strftime('%Y/%m/%d %H:%M:%S')
       r['content'] = row['content']
       @messages << r
-      statement.close
     end
     @messages.reverse!
 
